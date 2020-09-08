@@ -62,7 +62,7 @@ void *Compute(void* Data) {
     auto data = static_cast<ComputeData*>(Data);  
     for(auto i = data->begin; i < data->begin+data->gap && i < BooleanMatrix.size(); i++){
         for(auto j = 0; j < ComplexMatrix.at(0).size(); j++){
-            ComplexMatrix.at(i).at(j) = Complex(2*((1.0*j)/BooleanMatrix.at(i).size()) - 1, 3*((1.0*i)/BooleanMatrix.size()) - 2);
+            ComplexMatrix.at(i).at(j) = Complex(3*((1.0*i)/BooleanMatrix.size()) - 2, 2*((1.0*j)/BooleanMatrix.at(i).size()) - 1);
             BooleanMatrix.at(i).at(j) = Diverges(RecursiveMandelbrot(500, ComplexMatrix.at(i).at(j)));
         }
     }
