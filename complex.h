@@ -8,9 +8,9 @@ class Complex {
     public:
         Complex(): real(0), imaginary(0) {};
         Complex(double x, double y): real(x), imaginary(y) {};
-        Complex(double x): real(x), imaginary(0) {};
-        double GetReal() const {return real;};
-        double GetImg() const {return imaginary;};
+        explicit Complex(double x): real(x), imaginary(0) {};
+        inline double GetReal() const {return real;};
+        inline double GetImg() const {return imaginary;};
 };
 
 Complex operator+(Complex oleft, Complex oright) {
