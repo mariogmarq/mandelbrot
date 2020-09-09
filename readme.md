@@ -5,5 +5,11 @@ To compile
 ```
 g++ main.cpp -pthread -o exec
 ```
+And to run
+```
+./exec height width
+```
+Please note that optimus height width ratio is 3:2
+
 
 Use gimp to open the picture.
