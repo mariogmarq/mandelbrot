@@ -13,9 +13,6 @@
 #include <cstdlib>
 #define THREADS 16
 
-std::vector<std::vector<bool>> BooleanMatrix;
-std::vector<std::vector<Complex>> ComplexMatrix;
-
 /**
  * struct with the necesary data to compute
  */
@@ -24,10 +21,11 @@ struct ComputeData
     int begin;
     int gap;
     pthread_t thread;
+    std::vector<std::vector<bool>> *matrix = nullptr;
 };
 
 /**
- * @brief exit the program with @param message as output
+ * @brief exit the program with message as output
  * @param message the text to be shown
  */
 void errorBreak(const std::string &message)
@@ -47,7 +45,7 @@ Complex FunctionMandelbrot(Complex c, Complex z)
 }
 
 /**
- * @brief Applies FunctionMandelbrot(Complex c, Complex z) recursirvely over @param iterations iterations
+ * @brief Applies FunctionMandelbrot() recursirvely over iterations iterations
  * @param iterations The iterations of the succession
  * @param c The complex number to be checked
  */
@@ -100,17 +98,17 @@ void Print(std::vector<std::vector<bool>> &BooleanMatrix)
 }
 
 /**
- * @brief pthread ready function that calculates BooleanMatrix over ComplexMatrix
+ * @brief pthread ready function that calculates BooleanMatrix
  */
 void *Compute(void *Data)
 {
     auto data = static_cast<ComputeData *>(Data);
-    for (auto i = data->begin; i < BooleanMatrix.size(); i += data->gap)
+    for (auto i = data->begin; i < data->matrix->size(); i += data->gap)
     {
-        for (auto j = 0; j < ComplexMatrix.at(0).size(); j++)
+        for (auto j = 0; j < data->matrix->at(0).size(); j++)
         {
-            ComplexMatrix.at(i).at(j) = Complex(3 * ((1.0 * i) / BooleanMatrix.size()) - 2, 2 * ((1.0 * j) / BooleanMatrix.at(i).size()) - 1);
-            BooleanMatrix.at(i).at(j) = Diverges(RecursiveMandelbrot(500, ComplexMatrix.at(i).at(j)));
+            data->matrix->at(i).at(j) = Diverges(RecursiveMandelbrot(500,
+                                                                     Complex(3 * ((1.0 * i) / data->matrix->size()) - 2, 2 * ((1.0 * j) / data->matrix->at(i).size()) - 1)));
         }
     }
 
@@ -127,17 +125,16 @@ int main(int nargs, char **args)
     int height = atoi(args[1]), width = atoi(args[2]);
 
     ComputeData threads[THREADS];
+    std::vector<std::vector<bool>> BooleanMatrix;
 
     //Resize the matrix
     std::cout << "Creating Matrix" << std::endl;
 
     BooleanMatrix.resize(height);
-    ComplexMatrix.resize(height);
 
-    for (auto i = 0; i < ComplexMatrix.size(); i++)
+    for (auto i = 0; i < BooleanMatrix.size(); i++)
     {
         BooleanMatrix.at(i).resize(width);
-        ComplexMatrix.at(i).resize(width);
     }
 
     //Runs Compute(void* Data)
@@ -145,6 +142,7 @@ int main(int nargs, char **args)
 
     for (auto i = 0; i < THREADS; i++)
     {
+        threads[i].matrix = &BooleanMatrix;
         threads[i].gap = THREADS;
         threads[i].begin = i;
         pthread_create(&threads[i].thread, nullptr, Compute, &threads[i]);
